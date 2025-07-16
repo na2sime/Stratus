@@ -1,0 +1,62 @@
+{
+  "name": "Stratus",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Stratus React Framework",
+  "author": "Nassime ABDIOU",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/na2sime/Stratus.git"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "build:lib": "tsc --project tsconfig.lib.json",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "preview": "vite preview",
+    "prepublishOnly": "npm run build:lib"
+  },
+  "dependencies": {
+    "@types/node": "^24.0.14",
+    "glob": "^11.0.3",
+    "react-router-dom": "^7.6.3"
+  },
+  "peerDependencies": {
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0"
+  },
+  "devDependencies": {
+    "@types/glob": "^9.0.0",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "@typescript-eslint/eslint-plugin": "^8.37.0",
+    "@typescript-eslint/parser": "^8.37.0",
+    "@vitejs/plugin-react": "^4.2.0",
+    "eslint": "^9.31.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.4",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "typescript": "^5.2.2",
+    "vite": "^7.0.4"
+  },
+  "keywords": [
+    "react",
+    "framework",
+    "router",
+    "typescript",
+    "file-system-routing",
+    "middleware"
+  ],
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
