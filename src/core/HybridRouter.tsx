@@ -1,16 +1,21 @@
 import React, { Suspense, lazy, useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { hydrateRoot, createRoot } from 'react-dom/client';
+import { ServiceProvider } from '../services/ServiceContext';
+import { ServiceContainer } from '../services/ServiceContainer';
 import { RouterProvider } from './RouterContext';
 import { discoverRoutes } from './routeUtils';
 import { getConfig, setConfig } from '../config';
 import type { RouteDefinition, LayoutComponent } from './types';
 import type { StratusConfig } from '../config';
+import type { HydrationData } from '../ssr/types';
 
-interface AppRouterProps {
+interface HybridRouterProps {
   config?: Partial<StratusConfig>;
   fallback?: React.ReactNode;
   errorBoundary?: React.ComponentType<{ error: Error; retry: () => void }>;
   routes?: RouteDefinition[];
+  serviceContainer?: ServiceContainer;
 }
 
 const DefaultFallback = () => <div>Loading...</div>;
@@ -25,15 +30,21 @@ const DefaultErrorBoundary: React.FC<{ error: Error; retry: () => void }> = ({ e
 // Layout cache
 const layoutsCache = new Map<string, LayoutComponent>();
 
-export const AppRouter: React.FC<AppRouterProps> = ({
+/**
+ * Hybrid router that supports both client-side and server-side rendering
+ */
+export const HybridRouter: React.FC<HybridRouterProps> = ({
   config,
   fallback = <DefaultFallback />,
   errorBoundary: ErrorBoundary = DefaultErrorBoundary,
-  routes: predefinedRoutes
+  routes: predefinedRoutes,
+  serviceContainer
 }) => {
   const [routes, setRoutes] = useState<RouteDefinition[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const [container] = useState(() => serviceContainer || new ServiceContainer());
+  const [hydrationData, setHydrationData] = useState<HydrationData | null>(null);
 
   // Configure Stratus on startup
   useEffect(() => {
@@ -41,6 +52,18 @@ export const AppRouter: React.FC<AppRouterProps> = ({
       setConfig(config);
     }
   }, [config]);
+
+  // Load hydration data if available (SSR)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const data = (window as any).__STRATUS_DATA__;
+      if (data) {
+        setHydrationData(data);
+        // Clean up
+        delete (window as any).__STRATUS_DATA__;
+      }
+    }
+  }, []);
 
   // Route discovery
   useEffect(() => {
@@ -71,7 +94,6 @@ export const AppRouter: React.FC<AppRouterProps> = ({
     setError(null);
     setRoutes([]);
     setLoading(true);
-    // Re-trigger the effect
   };
 
   if (loading) {
@@ -82,34 +104,44 @@ export const AppRouter: React.FC<AppRouterProps> = ({
     return <ErrorBoundary error={error} retry={retry} />;
   }
 
-  return (
-    <BrowserRouter basename={getConfig().basePath}>
-      <RouterProvider>
-        <Routes>
-          {routes.map((route) => (
-            <Route
-              key={route.path}
-              path={route.path}
-              element={<RouteRenderer route={route} fallback={fallback} />}
-            />
-          ))}
-        </Routes>
-      </RouterProvider>
-    </BrowserRouter>
+  const app = (
+    <ServiceProvider container={container}>
+      <BrowserRouter basename={getConfig().basePath}>
+        <RouterProvider>
+          <Routes>
+            {routes.map((route) => (
+              <Route
+                key={route.path}
+                path={route.path}
+                element={
+                  <RouteRenderer 
+                    route={route} 
+                    fallback={fallback}
+                    initialProps={hydrationData?.props}
+                  />
+                }
+              />
+            ))}
+          </Routes>
+        </RouterProvider>
+      </BrowserRouter>
+    </ServiceProvider>
   );
+
+  return app;
 };
 
 // Component for rendering a route with its layout
 interface RouteRendererProps {
   route: RouteDefinition;
   fallback: React.ReactNode;
+  initialProps?: Record<string, any>;
 }
 
-const RouteRenderer: React.FC<RouteRendererProps> = ({ route, fallback }) => {
+const RouteRenderer: React.FC<RouteRendererProps> = ({ route, fallback, initialProps }) => {
   const LazyComponent = lazy(route.component);
-  
   const [Layout, setLayout] = useState<LayoutComponent | null>(null);
-  
+
   // Load layout if necessary
   useEffect(() => {
     const loadLayout = async () => {
@@ -144,7 +176,7 @@ const RouteRenderer: React.FC<RouteRendererProps> = ({ route, fallback }) => {
 
   const content = (
     <Suspense fallback={fallback}>
-      <LazyComponent />
+      <LazyComponent {...(initialProps || {})} />
     </Suspense>
   );
 
@@ -153,4 +185,56 @@ const RouteRenderer: React.FC<RouteRendererProps> = ({ route, fallback }) => {
   }
 
   return content;
+};
+
+/**
+ * Client-side hydration function
+ */
+export const hydrateApp = (
+  element: React.ReactElement,
+  container: HTMLElement,
+  callback?: () => void
+): void => {
+  const hydrationData = (window as any).__STRATUS_DATA__;
+  
+  if (hydrationData) {
+    // Hydrate if server-rendered
+    hydrateRoot(container, element, {
+      onRecoverableError: (error) => {
+        console.error('Hydration error:', error);
+      }
+    });
+    
+    if (callback) callback();
+  } else {
+    // Regular client-side rendering
+    createRoot(container).render(element);
+    
+    if (callback) callback();
+  }
+};
+
+/**
+ * Helper to create a Stratus app with SSR support
+ */
+export const createStratusApp = (props: HybridRouterProps) => {
+  return <HybridRouter {...props} />;
+};
+
+/**
+ * Mount the app to DOM (client-side)
+ */
+export const mountApp = (
+  props: HybridRouterProps,
+  containerId = 'root',
+  callback?: () => void
+): void => {
+  const container = document.getElementById(containerId);
+  
+  if (!container) {
+    throw new Error(`Container with id "${containerId}" not found`);
+  }
+
+  const app = createStratusApp(props);
+  hydrateApp(app, container, callback);
 };

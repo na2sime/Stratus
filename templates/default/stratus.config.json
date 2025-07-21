@@ -1,0 +1,13 @@
+{
+  "name": "{{PROJECT_NAME_KEBAB}}",
+  "features": {
+    "typescript": true,
+    "ssr": false
+  },
+  "dev": {
+    "port": 3000
+  },
+  "build": {
+    "outDir": "dist"
+  }
+}
