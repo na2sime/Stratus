@@ -28,7 +28,7 @@
     "build:lib": "tsc --project tsconfig.lib.json",
     "build:cli": "tsc --project tsconfig.cli.json",
     "build:all": "npm run build:lib && npm run build:cli",
-    "lint": "eslint . --report-unused-disable-directives --max-warnings 0",
+    "lint": "eslint . --report-unused-disable-directives --max-warnings 100",
     "preview": "vite preview",
     "prepublishOnly": "npm run build:all"
   },

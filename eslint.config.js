@@ -103,6 +103,6 @@ export default [
     },
   },
   {
-    ignores: ['dist/', 'node_modules/', 'templates/'],
+    ignores: ['dist/', 'cli-dist/', 'node_modules/', 'templates/'],
   },
 ];
