@@ -6,15 +6,15 @@ A modern, lightweight React framework inspired by Next.js but designed for simpl
 
 ```bash
 # Install CLI globally
-npm install -g stratus
+npm install -g @wizecorp/stratusjs
 
 # Create a new project (interactive)
-stratus create my-app
+stratusjs create my-app
 
 # Or create with specific template
-stratus create my-blog --template ssr      # Full SSR
-stratus create my-site --template hybrid   # Universal routing
-stratus create my-mvp --template default   # Services + middleware
+stratusjs create my-blog --template ssr      # Full SSR
+stratusjs create my-site --template hybrid   # Universal routing
+stratusjs create my-mvp --template default   # Services + middleware
 
 # Start development
 cd my-app
@@ -65,37 +65,40 @@ src/app/products/[id]/page.tsx      → /products/:id
 src/app/(dashboard)/layout.tsx      → Layout for dashboard pages
 ```
 
-### Service Container
+## Services & Dependency Injection
 
-Clean separation of business logic using dependency injection:
-
-```typescript
+```tsx
 // src/services/ApiService.ts
 export class HttpService {
-  private baseUrl = 'https://api.example.com';
-  
-  async get<T>(endpoint: string): Promise<T> {
-    const response = await fetch(`${this.baseUrl}${endpoint}`);
-    return await response.json();
-  }
+    private baseUrl: string;
+
+    constructor(baseUrl: string = 'https://api.example.com') {
+        this.baseUrl = baseUrl;
+    }
+
+    async get<T>(endpoint: string): Promise<T> {
+        const response = await fetch(`${this.baseUrl}${endpoint}`);
+        if (!response.ok) {
+            throw new Error(`HTTP Error: ${response.status}`);
+        }
+        return await response.json();
+    }
 }
 
-// Register in main.tsx
+// src/main.tsx - Register services
 const serviceContainer = new ServiceContainer();
 serviceContainer.register('httpService', () => new HttpService());
 
-// Using in components
-import { useService } from 'stratus';
+// Use in components
+function UsersPage() {
+    const httpService = useService<HttpService>('httpService');
+    const [users, setUsers] = useState([]);
 
-export default function UserList() {
-  const httpService = useService<HttpService>('httpService');
-  const [users, setUsers] = useState([]);
-  
-  useEffect(() => {
-    httpService.get('/users').then(setUsers);
-  }, [httpService]);
-  
-  return <div>{/* Render users */}</div>;
+    useEffect(() => {
+        httpService.get('/users').then(setUsers).catch(console.error);
+    }, [httpService]);
+
+    return <div>{/* render users */}</div>;
 }
 ```
 
@@ -185,49 +188,49 @@ Choose from pre-built templates to kickstart your project:
 
 ```bash
 # Create project
-stratus create <name>              # Interactive project creation
-stratus create my-app --template ssr --js
+stratusjs create <name>              # Interactive project creation
+stratusjs create my-app --template ssr --js
 
 # Available templates: default, hybrid, ssr
 
 # Development
-stratus dev                        # Start dev server
-stratus dev --port 8080           # Custom port
+stratusjs dev                        # Start dev server
+stratusjs dev --port 8080           # Custom port
 
 # Building
-stratus build                      # Production build
-stratus build --ssr               # Build with SSR (ssr template)
+stratusjs build                      # Production build
+stratusjs build --ssr               # Build with SSR (ssr template)
 
 # Code Generation
-stratus generate page about       # Create page
-stratus g service user            # Create service
-stratus g layout dashboard        # Create layout
+stratusjs generate page about       # Create page
+stratusjs g service user            # Create service
+stratusjs g layout dashboard        # Create layout
 
 # Deployment
-stratus deploy                     # Interactive deployment
-stratus deploy --platform vercel  # Deploy to Vercel
+stratusjs deploy                     # Interactive deployment
+stratusjs deploy --platform vercel  # Deploy to Vercel
 ```
 
 ## 🚢 Deployment
 
 ### Vercel (Recommended for SSR)
 ```bash
-stratus deploy --platform vercel
+stratusjs deploy --platform vercel
 ```
 
 ### Netlify (Great for static sites)
 ```bash
-stratus deploy --platform netlify
+stratusjs deploy --platform netlify
 ```
 
 ### Docker
 ```bash
-stratus deploy --platform docker
+stratusjs deploy --platform docker
 ```
 
 ### Node.js Server
 ```bash
-stratus deploy --platform node
+stratusjs deploy --platform node
 ```
 
 ## File Structure
@@ -251,47 +254,9 @@ src/
     userService.ts    # Business logic services
 ```
 
-## Services & Dependency Injection
-
-```tsx
-// src/services/ApiService.ts
-export class HttpService {
-  private baseUrl: string;
-
-  constructor(baseUrl: string = 'https://api.example.com') {
-    this.baseUrl = baseUrl;
-  }
-
-  async get<T>(endpoint: string): Promise<T> {
-    const response = await fetch(`${this.baseUrl}${endpoint}`);
-    if (!response.ok) {
-      throw new Error(`HTTP Error: ${response.status}`);
-    }
-    return await response.json();
-  }
-}
-
-// src/main.tsx - Register services
-const serviceContainer = new ServiceContainer();
-serviceContainer.register('httpService', () => new HttpService());
-
-// Use in components
-function UsersPage() {
-  const httpService = useService<HttpService>('httpService');
-  const [users, setUsers] = useState([]);
-  
-  useEffect(() => {
-    httpService.get('/users').then(setUsers).catch(console.error);
-  }, [httpService]);
-  
-  return <div>{/* render users */}</div>;
-}
-```
-
 ## 📖 Documentation
 
 - [CLI Documentation](./CLI.md) - Complete CLI reference
-- [CLAUDE.md](./CLAUDE.md) - Development guidelines and architecture
 
 ## 🔧 Configuration
 
@@ -364,7 +329,3 @@ MIT License - see [LICENSE](LICENSE) for details.
 ---
 
 Built with ❤️ for the React community. Start building amazing applications today!
-
-```bash
-npx stratus create my-awesome-app
-```

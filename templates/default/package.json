@@ -4,8 +4,8 @@
   "description": "A Stratus React application",
   "type": "module",
   "scripts": {
-    "dev": "stratus dev",
-    "build": "stratus build",
+    "dev": "stratusjs dev",
+    "build": "stratusjs build",
     "preview": "vite preview",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "type-check": "tsc --noEmit"
@@ -13,7 +13,7 @@
   "dependencies": {
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "stratus": "latest"
+    "@wizecorp/stratusjs": "latest"
   },
   "devDependencies": {
     "@types/react": "^19.1.8",

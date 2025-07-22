@@ -1,5 +1,5 @@
 {
-  "name": "Stratus",
+  "name": "@wizecorp/stratusjs",
   "version": "0.1.0-beta",
   "type": "module",
   "description": "Stratus React Framework",
@@ -12,11 +12,12 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
-    "stratus": "bin/stratus.js"
+    "stratusjs": "bin/stratus.js"
   },
   "files": [
     "dist",
     "bin",
+    "cli-dist",
     "templates",
     "README.md",
     "LICENSE"
@@ -25,9 +26,11 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "build:lib": "tsc --project tsconfig.lib.json",
+    "build:cli": "tsc --project tsconfig.cli.json",
+    "build:all": "npm run build:lib && npm run build:cli",
     "lint": "eslint . --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-    "prepublishOnly": "npm run build:lib"
+    "prepublishOnly": "npm run build:all"
   },
   "dependencies": {
     "@types/node": "^24.0.14",

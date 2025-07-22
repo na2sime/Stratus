@@ -103,6 +103,7 @@ async function createProject(projectName, projectPath, options) {
     }
     // Create project directory
     await FileUtils.ensureDir(projectPath);
+    
     // Copy template
     logger.updateSpinner('Copying template files...');
     const replacements = {
@@ -113,12 +114,15 @@ async function createProject(projectName, projectPath, options) {
         '{{ENABLE_SSR}}': options.ssr ? 'true' : 'false',
         '{{USE_TYPESCRIPT}}': !options.js ? 'true' : 'false'
     };
+    
     await FileUtils.copyTemplate(templatePath, projectPath, replacements);
+    
     // If JavaScript is selected, convert TypeScript files
     if (options.js) {
         logger.updateSpinner('Converting to JavaScript...');
         await convertToJavaScript(projectPath);
     }
+    
     // Create Stratus config
     logger.updateSpinner('Creating configuration...');
     await createStratusConfig(projectPath, options);

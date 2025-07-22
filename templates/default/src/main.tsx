@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { AppRouter, ServiceProvider, ServiceContainer } from 'stratus';
+import { AppRouter, ServiceProvider, ServiceContainer } from '@wizecorp/stratusjs';
 import { HttpService } from './services/ApiService';
 import './index.css';
 

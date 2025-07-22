@@ -4,9 +4,9 @@
   "description": "A Stratus React application with full Server-Side Rendering (SSR)",
   "type": "module",
   "scripts": {
-    "dev": "stratus dev",
-    "build": "stratus build",
-    "build:ssr": "stratus build --ssr",
+    "dev": "stratusjs dev",
+    "build": "stratusjs build",
+    "build:ssr": "stratusjs build --ssr",
     "preview": "vite preview",
     "start": "node dist/server.js",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
@@ -15,7 +15,7 @@
   "dependencies": {
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "stratus": "latest"
+    "@wizecorp/stratusjs": "latest"
   },
   "devDependencies": {
     "@types/react": "^19.1.8",

@@ -5,12 +5,12 @@ The Stratus CLI is a powerful command-line tool for creating and managing Stratu
 ## Installation
 
 ```bash
-npm install -g stratus
+npm install -g @wizecorp/stratusjs
 ```
 
 ## Commands Overview
 
-### `stratus create <project-name>`
+### `stratusjs create <project-name>`
 
 Creates a new Stratus project with interactive setup.
 
@@ -21,9 +21,9 @@ Creates a new Stratus project with interactive setup.
 
 **Examples:**
 ```bash
-stratus create my-app
-stratus create my-blog --template blog --ssr
-stratus create my-store --template ecommerce --js
+stratusjs create my-app
+stratusjs create my-blog --template blog --ssr
+stratusjs create my-store --template ecommerce --js
 ```
 
 **Interactive Setup:**
@@ -34,7 +34,7 @@ stratus create my-store --template ecommerce --js
 
 ---
 
-### `stratus dev`
+### `stratusjs dev`
 
 Starts the development server with hot module replacement.
 
@@ -44,9 +44,9 @@ Starts the development server with hot module replacement.
 
 **Examples:**
 ```bash
-stratus dev
-stratus dev --port 8080
-stratus dev --ssr
+stratusjs dev
+stratusjs dev --port 8080
+stratusjs dev --ssr
 ```
 
 ---
@@ -61,9 +61,9 @@ Builds the project for production.
 
 **Examples:**
 ```bash
-stratus build
-stratus build --ssr
-stratus build --static
+stratusjs build
+stratusjs build --ssr
+stratusjs build --static
 ```
 
 **Build Process:**
@@ -92,10 +92,10 @@ Generates components, services, layouts, and middleware.
 
 **Examples:**
 ```bash
-stratus generate page about
-stratus g service user --dir services
-stratus g layout dashboard
-stratus generate middleware auth
+stratusjs generate page about
+stratusjs g service user --dir services
+stratusjs g layout dashboard
+stratusjs generate middleware auth
 ```
 
 ---
@@ -116,9 +116,9 @@ Deploys the project to various platforms.
 
 **Examples:**
 ```bash
-stratus deploy
-stratus deploy --platform vercel --build
-stratus deploy --platform docker
+stratusjs deploy
+stratusjs deploy --platform vercel --build
+stratusjs deploy --platform docker
 ```
 
 ---
@@ -156,128 +156,11 @@ my-stratus-app/
 └── tsconfig.json
 ```
 
-## Configuration
-
-### stratus.config.json
-
-```json
-{
-  "name": "my-app",
-  "features": {
-    "typescript": true,
-    "ssr": false
-  },
-  "dev": {
-    "port": 3000
-  },
-  "build": {
-    "outDir": "dist"
-  }
-}
-```
-
-## Templates
-
-### Default Template
-- Basic React application
-- TypeScript configured
-- Vite build system
-- File-based routing
-- Service container ready
-
-### Blog Template
-- Static site generation optimized
-- SSR enabled by default
-- Blog post structure
-- SEO friendly
-
-### Dashboard Template
-- Admin dashboard layout
-- SSR support
-- Metrics components
-- Business logic services
-
-### E-commerce Template
-- Product showcase
-- Shopping cart structure
-- Payment ready
-- SSR optimized
-
-## File-Based Routing
-
-Stratus uses file-based routing similar to Next.js:
-
-- `src/app/page.tsx` → `/`
-- `src/app/about/page.tsx` → `/about`
-- `src/app/products/[id]/page.tsx` → `/products/:id`
-- `src/app/(group)/layout.tsx` → Layout for group
-
-## Services System
-
-Services provide clean separation of business logic:
-
-```typescript
-// src/services/userService.ts
-export class UserService implements Service {
-  readonly name = 'UserService';
-
-  async initialize() {
-    // Service initialization
-  }
-
-  async getUsers() {
-    // Business logic
-  }
-}
-
-// Using in components
-import { useService } from 'stratus';
-
-function UserList() {
-  const userService = useService(UserService);
-  // Use service methods
-}
-```
-
-## SSR Support
-
-Server-Side Rendering is supported through the SSR renderer:
-
-```typescript
-// Page with server-side props
-export async function getServerSideProps(context: SSRContext) {
-  return {
-    props: {
-      data: await fetchData()
-    }
-  };
-}
-```
-
-## Middleware System
-
-Higher-Order Components for cross-cutting concerns:
-
-```typescript
-// src/middleware/authMiddleware.tsx
-export const withAuth = (): MiddlewareFunction => {
-  return (Component) => {
-    return (props) => {
-      // Authentication logic
-      return <Component {...props} />;
-    };
-  };
-};
-
-// Usage in pages
-export default withAuth()(MyPage);
-```
-
 ## Deployment
 
 ### Vercel
 ```bash
-stratus deploy --platform vercel
+stratusjs deploy --platform vercel
 ```
 - Automatic SSR configuration
 - Zero-config deployment
@@ -285,7 +168,7 @@ stratus deploy --platform vercel
 
 ### Netlify
 ```bash
-stratus deploy --platform netlify
+stratusjs deploy --platform netlify
 ```
 - Static site deployment
 - SPA fallback routing
@@ -293,7 +176,7 @@ stratus deploy --platform netlify
 
 ### Docker
 ```bash
-stratus deploy --platform docker
+stratusjs deploy --platform docker
 ```
 - Containerized deployment
 - Production-ready server
@@ -301,7 +184,7 @@ stratus deploy --platform docker
 
 ### Node.js Server
 ```bash
-stratus deploy --platform node
+stratusjs deploy --platform node
 ```
 - Raw Node.js deployment
 - Express server included
@@ -326,11 +209,11 @@ stratus deploy --platform node
 - Verify file paths and imports
 
 **Development Server Issues:**
-- Check port availability: `stratus dev --port 8080`
+- Check port availability: `stratusjs dev --port 8080`
 - Clear node_modules and reinstall: `rm -rf node_modules && npm install`
 
 **Deployment Issues:**
-- Build project first: `stratus build`
+- Build project first: `stratusjs build`
 - Check platform-specific requirements
 - Verify configuration files
 
@@ -338,27 +221,5 @@ stratus deploy --platform node
 
 1. Check the official documentation
 2. Review project configuration
-3. Use `stratus info` for debugging information
+3. Use `stratusjs info` for debugging information
 4. Check console logs for detailed error messages
-
----
-
-## Migration Guide
-
-### From Create React App
-
-1. Install Stratus CLI: `npm install -g stratus`
-2. Create new project: `stratus create my-app`
-3. Move components to `src/app/` structure
-4. Update imports and routing
-5. Configure services if needed
-
-### From Next.js
-
-1. Create Stratus project with similar template
-2. Move pages to `src/app/` structure
-3. Convert API routes to services
-4. Update configuration for SSR if needed
-5. Test and deploy
-
-The Stratus CLI provides a complete development experience with modern tooling, flexible architecture, and multiple deployment options while remaining lightweight and developer-friendly.
