@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useService } from 'stratus';
+import { useService, GetStaticProps } from 'stratus';
 import { HttpService } from '../services/ApiService';
 import { withAuth } from '../middleware/auth';
 
@@ -52,9 +52,12 @@ function HomePage() {
 
           <div className="mt-12">
             <p className="text-lg text-gray-600 dark:text-gray-400">
-              Built with Stratus Framework + TailwindCSS
+              Built with Stratus SSR + TailwindCSS
             </p>
             <div className="flex justify-center space-x-4 mt-4">
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+                SSR
+              </span>
               <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
                 Services
               </span>
@@ -65,6 +68,15 @@ function HomePage() {
                 TailwindCSS
               </span>
             </div>
+          </div>
+
+          <div className="mt-8">
+            <a
+              href="/about"
+              className="inline-flex items-center px-6 py-3 bg-green-500 hover:bg-green-600 text-white font-medium rounded-lg transition duration-200 transform hover:scale-105"
+            >
+              View SSR Demo →
+            </a>
           </div>
         </div>
       </div>

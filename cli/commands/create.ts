@@ -40,18 +40,11 @@ export async function createCommand(projectName: string, options: CreateOptions)
         name: 'template',
         message: 'Choose a template:',
         choices: [
-          { name: 'Default (Basic routing + services)', value: 'default' },
-          { name: 'Blog (With dynamic routes)', value: 'blog' },
-          { name: 'Dashboard (With authentication)', value: 'dashboard' },
-          { name: 'E-commerce (Full-featured)', value: 'ecommerce' }
+          { name: 'Default (Services + Middleware + TailwindCSS)', value: 'default' },
+          { name: 'Hybrid (Universal routing with SSR support)', value: 'hybrid' },
+          { name: 'SSR (Full server-side rendering)', value: 'ssr' }
         ],
         default: 'default'
-      },
-      {
-        type: 'confirm',
-        name: 'enableSSR',
-        message: 'Enable Server-Side Rendering (SSR)?',
-        default: false
       },
       {
         type: 'confirm',
@@ -69,7 +62,7 @@ export async function createCommand(projectName: string, options: CreateOptions)
     ]);
 
     options.template = answers.template;
-    options.ssr = answers.enableSSR;
+    options.ssr = answers.template === 'ssr' || answers.template === 'hybrid';
     options.js = !answers.useTypeScript;
   }
 
@@ -82,6 +75,33 @@ export async function createCommand(projectName: string, options: CreateOptions)
     console.log(`  cd ${projectName}`);
     console.log('  npm install');
     console.log('  npm run dev');
+    
+    // Show template specific information
+    if (options.template === 'ssr') {
+      console.log('\n📋 SSR Template Features:');
+      console.log('  - Full server-side rendering with getServerSideProps');
+      console.log('  - Demo SSR page at /about');
+      console.log('  - Use "npm run build:ssr" for production build');
+      console.log('  - Use "npm start" to run production server');
+    } else if (options.template === 'hybrid') {
+      console.log('\n📋 Hybrid Template Features:');
+      console.log('  - Universal routing with SSR support');
+      console.log('  - Client-side hydration');
+      console.log('  - Supports both SSR and CSR pages');
+    } else {
+      console.log('\n📋 Default Template Features:');
+      console.log('  - Services & middleware architecture');
+      console.log('  - TailwindCSS for styling');
+      console.log('  - Authentication middleware example');
+    }
+    
+    console.log('\n🚀 All templates include:');
+    console.log('  - Service container for dependency injection');
+    console.log('  - Middleware system for cross-cutting concerns');
+    console.log('  - TailwindCSS with dark mode support');
+    console.log('  - TypeScript support');
+    console.log('  - Hot module replacement');
+    
     console.log('\nHappy coding! ⚡');
     
   } catch (error) {
@@ -159,18 +179,27 @@ async function createStratusConfig(projectPath: string, options: CreateOptions):
     version: '1.0.0',
     template: options.template,
     features: {
-      ssr: options.ssr || false,
+      ssr: options.template === 'ssr' || options.template === 'hybrid',
+      hybrid: options.template === 'hybrid',
       typescript: !options.js,
       services: true,
-      middleware: true
+      middleware: true,
+      tailwindcss: true
+    },
+    routing: {
+      routesDir: 'src/app',
+      layoutsDir: 'src/layouts',
+      pageExtensions: ['tsx', 'ts', 'jsx', 'js']
     },
     build: {
       outDir: 'dist',
-      assetsDir: 'assets'
+      assetsDir: 'assets',
+      ssr: options.template === 'ssr'
     },
     dev: {
-      port: 3000,
-      open: true
+      port: 5173,
+      open: true,
+      host: 'localhost'
     }
   };
 

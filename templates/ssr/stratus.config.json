@@ -2,7 +2,7 @@
   "name": "{{PROJECT_NAME_KEBAB}}",
   "features": {
     "typescript": true,
-    "ssr": true
+    "ssr": false
   },
   "dev": {
     "port": 3000

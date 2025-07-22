@@ -52,9 +52,12 @@ function HomePage() {
 
           <div className="mt-12">
             <p className="text-lg text-gray-600 dark:text-gray-400">
-              Built with Stratus Framework + TailwindCSS
+              Built with Stratus Hybrid Router + TailwindCSS
             </p>
             <div className="flex justify-center space-x-4 mt-4">
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200">
+                Hybrid Router
+              </span>
               <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
                 Services
               </span>

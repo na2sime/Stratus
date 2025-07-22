@@ -1,6 +1,6 @@
 # ⚡ Stratus - Lightweight React Framework
 
-A modern, lightweight React framework inspired by Next.js but designed for simplicity and performance. Build fast, scalable applications with file-based routing, built-in services, and optional SSR support.
+A modern, lightweight React framework inspired by Next.js but designed for simplicity and performance. Build fast, scalable applications with file-based routing, service injection, middleware system, and powerful SSR capabilities.
 
 ## 🚀 Quick Start
 
@@ -8,23 +8,32 @@ A modern, lightweight React framework inspired by Next.js but designed for simpl
 # Install CLI globally
 npm install -g stratus
 
-# Create a new project
+# Create a new project (interactive)
 stratus create my-app
+
+# Or create with specific template
+stratus create my-blog --template ssr      # Full SSR
+stratus create my-site --template hybrid   # Universal routing
+stratus create my-mvp --template default   # Services + middleware
 
 # Start development
 cd my-app
-stratus dev
+npm install
+npm run dev
 ```
+
+Open [http://localhost:5173](http://localhost:5173) to view your application.
 
 ## ✨ Features
 
 - **🗂️ File-Based Routing** - Automatic routing based on file structure
-- **⚙️ Dependency Injection** - Clean service architecture for business logic
-- **🎭 Server-Side Rendering** - Optional SSR with hydration support
+- **⚙️ Service Container** - Dependency injection with clean architecture
+- **🛡️ Middleware System** - HOC-based middleware for cross-cutting concerns
+- **🎭 SSR & Hybrid Routing** - Full SSR, hybrid rendering, or client-side only
+- **🎨 TailwindCSS** - Modern utility-first styling with dark mode
 - **🔧 TypeScript First** - Full TypeScript support with excellent DX
 - **📦 Lightweight** - Minimal bundle size, maximum performance
 - **🛠️ Modern Tooling** - Vite-powered development and building
-- **🎨 Template System** - Multiple project templates (blog, dashboard, e-commerce)
 - **🚢 Easy Deployment** - One-click deployment to Vercel, Netlify, Docker
 
 ## 🏗️ Architecture
@@ -36,9 +45,11 @@ src/
 │   ├── page.tsx           # Home page (/)
 │   └── about/
 │       └── page.tsx       # About page (/about)
-├── services/              # Business logic services
-├── middleware/            # HOC middleware
-└── main.tsx              # App entry point
+├── services/              # Service layer with DI
+│   └── ApiService.ts      # HTTP service example
+├── middleware/            # HOC middleware system
+│   └── auth.tsx          # Authentication middleware
+└── main.tsx              # App entry point with service registration
 ```
 
 ## 📚 Core Concepts
@@ -54,30 +65,35 @@ src/app/products/[id]/page.tsx      → /products/:id
 src/app/(dashboard)/layout.tsx      → Layout for dashboard pages
 ```
 
-### Services System
+### Service Container
 
 Clean separation of business logic using dependency injection:
 
 ```typescript
-// src/services/userService.ts
-export class UserService implements Service {
-  readonly name = 'UserService';
+// src/services/ApiService.ts
+export class HttpService {
+  private baseUrl = 'https://api.example.com';
   
-  async getUsers() {
-    return await fetch('/api/users').then(r => r.json());
+  async get<T>(endpoint: string): Promise<T> {
+    const response = await fetch(`${this.baseUrl}${endpoint}`);
+    return await response.json();
   }
 }
+
+// Register in main.tsx
+const serviceContainer = new ServiceContainer();
+serviceContainer.register('httpService', () => new HttpService());
 
 // Using in components
 import { useService } from 'stratus';
 
 export default function UserList() {
-  const userService = useService(UserService);
+  const httpService = useService<HttpService>('httpService');
   const [users, setUsers] = useState([]);
   
   useEffect(() => {
-    userService.getUsers().then(setUsers);
-  }, []);
+    httpService.get('/users').then(setUsers);
+  }, [httpService]);
   
   return <div>{/* Render users */}</div>;
 }
@@ -85,16 +101,28 @@ export default function UserList() {
 
 ### Server-Side Rendering
 
-Optional SSR with simple data fetching:
+Full SSR support with data fetching:
 
 ```typescript
-export async function getServerSideProps(context: SSRContext) {
-  const data = await fetchData();
-  return { props: { data } };
-}
+import { GetServerSideProps } from 'stratus';
 
-export default function Page({ data }) {
-  return <div>{data.title}</div>;
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const data = await fetchDataFromAPI();
+  return {
+    props: {
+      data,
+      serverTimestamp: new Date().toISOString()
+    }
+  };
+};
+
+export default function Page({ data, serverTimestamp }) {
+  return (
+    <div>
+      <h1>{data.title}</h1>
+      <p>Generated at: {serverTimestamp}</p>
+    </div>
+  );
 }
 ```
 
@@ -103,47 +131,72 @@ export default function Page({ data }) {
 Higher-Order Components for cross-cutting concerns:
 
 ```typescript
-// src/middleware/authMiddleware.tsx
-export const withAuth = () => (Component) => (props) => {
-  // Authentication logic
-  return <Component {...props} />;
-};
+// src/middleware/auth.tsx
+interface AuthOptions {
+  redirectTo?: string;
+  requireAuth?: boolean;
+}
+
+export function withAuth<P extends {}>(
+  Component: React.ComponentType<P>,
+  options: AuthOptions = {}
+) {
+  return function AuthenticatedComponent(props: P) {
+    if (options.requireAuth && !isAuthenticated()) {
+      return <LoginPage />;
+    }
+    return <Component {...props} />;
+  };
+}
 
 // Usage
-export default withAuth()(MyProtectedPage);
+export default withAuth(MyProtectedPage, { redirectTo: '/login' });
 ```
 
 ## 🎯 Templates
 
 Choose from pre-built templates to kickstart your project:
 
-### Default
-Basic React application with TypeScript and routing.
+### 🏗️ Default
+**Perfect for:** Most applications, MVPs, client projects
+- ✅ Service container with dependency injection
+- ✅ Authentication middleware example
+- ✅ TailwindCSS with dark mode support
+- ✅ TypeScript configuration
+- ✅ Modern component architecture
 
-### Blog
-Static site generation optimized for content sites.
+### 🔄 Hybrid
+**Perfect for:** Universal applications with SSR needs
+- ✅ HybridRouter with client-side and server-side rendering
+- ✅ Automatic hydration support
+- ✅ All default template features
+- ✅ Optimized for SEO and performance
+- ✅ Supports both SSR and CSR pages
 
-### Dashboard
-Admin dashboard with metrics and business logic services.
-
-### E-commerce
-Product showcase with shopping cart structure.
+### 🌐 SSR
+**Perfect for:** Content-heavy sites, blogs, e-commerce
+- ✅ Full server-side rendering with `getServerSideProps`
+- ✅ Demo SSR page with server data fetching
+- ✅ Production server configuration
+- ✅ Enhanced SEO capabilities
+- ✅ All default template features
 
 ## 🛠️ CLI Commands
 
 ```bash
 # Create project
 stratus create <name>              # Interactive project creation
-stratus create blog --template blog --ssr
+stratus create my-app --template ssr --js
+
+# Available templates: default, hybrid, ssr
 
 # Development
 stratus dev                        # Start dev server
-stratus dev --port 8080 --ssr     # Custom port with SSR
+stratus dev --port 8080           # Custom port
 
 # Building
 stratus build                      # Production build
-stratus build --ssr               # Build with SSR
-stratus build --static            # Static site generation
+stratus build --ssr               # Build with SSR (ssr template)
 
 # Code Generation
 stratus generate page about       # Create page
@@ -201,24 +254,35 @@ src/
 ## Services & Dependency Injection
 
 ```tsx
-// Define a service
-export class UserService implements Service {
-  readonly name = 'UserService';
-  
-  async getUsers() {
-    // Business logic here
-    return await fetch('/api/users').then(r => r.json());
+// src/services/ApiService.ts
+export class HttpService {
+  private baseUrl: string;
+
+  constructor(baseUrl: string = 'https://api.example.com') {
+    this.baseUrl = baseUrl;
+  }
+
+  async get<T>(endpoint: string): Promise<T> {
+    const response = await fetch(`${this.baseUrl}${endpoint}`);
+    if (!response.ok) {
+      throw new Error(`HTTP Error: ${response.status}`);
+    }
+    return await response.json();
   }
 }
 
+// src/main.tsx - Register services
+const serviceContainer = new ServiceContainer();
+serviceContainer.register('httpService', () => new HttpService());
+
 // Use in components
 function UsersPage() {
-  const userService = useService(UserService);
+  const httpService = useService<HttpService>('httpService');
   const [users, setUsers] = useState([]);
   
   useEffect(() => {
-    userService.getUsers().then(setUsers);
-  }, [userService]);
+    httpService.get('/users').then(setUsers).catch(console.error);
+  }, [httpService]);
   
   return <div>{/* render users */}</div>;
 }
@@ -236,15 +300,29 @@ Configure your project in `stratus.config.json`:
 ```json
 {
   "name": "my-app",
+  "template": "default",
   "features": {
+    "ssr": false,
+    "hybrid": false,
     "typescript": true,
+    "services": true,
+    "middleware": true,
+    "tailwindcss": true
+  },
+  "routing": {
+    "routesDir": "src/app",
+    "layoutsDir": "src/layouts",
+    "pageExtensions": ["tsx", "ts", "jsx", "js"]
+  },
+  "build": {
+    "outDir": "dist",
+    "assetsDir": "assets",
     "ssr": false
   },
   "dev": {
-    "port": 3000
-  },
-  "build": {
-    "outDir": "dist"
+    "port": 5173,
+    "open": true,
+    "host": "localhost"
   }
 }
 ```
@@ -267,9 +345,11 @@ MIT License - see [LICENSE](LICENSE) for details.
 |---------|---------|---------|------------------|
 | Bundle Size | ⚡ Minimal | 📦 Large | 📦 Medium |
 | Learning Curve | 📈 Easy | 📈 Moderate | 📈 Easy |
-| SSR Support | ✅ Optional | ✅ Built-in | ❌ No |
+| SSR Support | ✅ 3 Options | ✅ Built-in | ❌ No |
 | File Routing | ✅ Yes | ✅ Yes | ❌ No |
 | Services DI | ✅ Built-in | ❌ Manual | ❌ Manual |
+| Middleware | ✅ HOC System | ⚠️ Route-based | ❌ No |
+| TailwindCSS | ✅ Pre-configured | ⚠️ Manual setup | ⚠️ Manual setup |
 | CLI Tools | ✅ Rich | ✅ Rich | ⚠️ Basic |
 | TypeScript | ✅ First-class | ✅ Good | ⚠️ Setup required |
 
