@@ -12,11 +12,11 @@ const __dirname = dirname(__filename);
 const packageJson = JSON.parse(readFileSync(join(__dirname, '../package.json'), 'utf8'));
 
 // Import commands
-import { createCommand } from '../cli/commands/create.js';
-import { devCommand } from '../cli/commands/dev.js';
-import { buildCommand } from '../cli/commands/build.js';
-import { generateCommand } from '../cli/commands/generate.js';
-import { deployCommand } from '../cli/commands/deploy.js';
+import { createCommand } from '../cli-dist/commands/create.js';
+import { devCommand } from '../cli-dist/commands/dev.js';
+import { buildCommand } from '../cli-dist/commands/build.js';
+import { generateCommand } from '../cli-dist/commands/generate.js';
+import { deployCommand } from '../cli-dist/commands/deploy.js';
 
 program
   .name('stratus')
