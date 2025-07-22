@@ -2,12 +2,8 @@ import inquirer from 'inquirer';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
-import { exec } from 'child_process';
-import { promisify } from 'util';
 import { logger } from '../utils/logger.js';
 import { FileUtils } from '../utils/fileUtils.js';
-
-const execAsync = promisify(exec);
 
 interface CreateOptions {
   template: string;

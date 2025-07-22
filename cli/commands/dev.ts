@@ -23,7 +23,7 @@ export async function devCommand(options: DevOptions) {
   try {
     const fs = await import('fs-extra');
     config = await fs.readJSON(configPath);
-  } catch (error) {
+  } catch {
     logger.error('Failed to read stratus.config.json');
     process.exit(1);
   }
@@ -37,7 +37,8 @@ export async function devCommand(options: DevOptions) {
 
   // Set environment variables
   process.env.STRATUS_MODE = 'development';
-  process.env.STRATUS_PORT = options.port || config.dev?.port || '3000';
+  const port = options.port || config.dev?.port || '5173';
+  process.env.STRATUS_PORT = port;
   
   if (options.ssr || config.features?.ssr) {
     process.env.STRATUS_SSR = 'true';
@@ -49,13 +50,17 @@ export async function devCommand(options: DevOptions) {
 
   try {
     // Use Vite for development
-    const viteProcess = spawn('npx', ['vite', '--port', process.env.STRATUS_PORT], {
-      stdio: 'inherit',
+    const viteProcess = spawn('npx', ['vite', '--port', port], {
+      stdio: 'pipe',
       shell: true,
       cwd: process.cwd()
     });
 
-    logger.succeedSpinner(`Development server running on http://localhost:${process.env.STRATUS_PORT}`);
+    // Pipe output to console
+    viteProcess.stdout?.pipe(process.stdout);
+    viteProcess.stderr?.pipe(process.stderr);
+
+    logger.succeedSpinner(`Development server running on http://localhost:${port}`);
 
     // Handle process termination
     process.on('SIGINT', () => {

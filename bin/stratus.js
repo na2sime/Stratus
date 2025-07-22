@@ -39,7 +39,7 @@ program
 program
   .command('dev')
   .description('Start development server')
-  .option('-p, --port <port>', 'Port number', '3000')
+  .option('-p, --port <port>', 'Port number', '5173')
   .option('--ssr', 'Enable SSR development mode')
   .action(devCommand);
 

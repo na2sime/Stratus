@@ -23,7 +23,7 @@ export async function buildCommand(options: BuildOptions) {
   try {
     const fs = await import('fs-extra');
     config = await fs.readJSON(configPath);
-  } catch (error) {
+  } catch {
     logger.error('Failed to read stratus.config.json');
     process.exit(1);
   }
@@ -86,7 +86,7 @@ export async function buildCommand(options: BuildOptions) {
 
 async function runCommand(command: string, args: string[]): Promise<void> {
   return new Promise((resolve, reject) => {
-    const process = spawn(command, args, {
+    const childProcess = spawn(command, args, {
       stdio: 'pipe',
       shell: true,
       cwd: process.cwd()
@@ -94,11 +94,11 @@ async function runCommand(command: string, args: string[]): Promise<void> {
 
     let stderr = '';
 
-    process.stderr?.on('data', (data) => {
+    childProcess.stderr?.on('data', (data) => {
       stderr += data.toString();
     });
 
-    process.on('exit', (code) => {
+    childProcess.on('exit', (code) => {
       if (code !== 0) {
         reject(new Error(`Command failed with code ${code}: ${stderr}`));
       } else {
@@ -108,7 +108,7 @@ async function runCommand(command: string, args: string[]): Promise<void> {
   });
 }
 
-async function buildSSRServer(config: any): Promise<void> {
+async function buildSSRServer(config: { build?: { outDir?: string } }): Promise<void> {
   // Create server build configuration
   const serverBuildConfig = {
     build: {
@@ -139,7 +139,7 @@ export default defineConfig(${JSON.stringify(serverBuildConfig, null, 2)});
   }
 }
 
-async function generateStaticPages(config: any): Promise<void> {
+async function generateStaticPages(config: { build?: { outDir?: string }, name?: string }): Promise<void> {
   logger.info('Generating static pages...');
   
   // Create a simple static page generator
@@ -185,14 +185,14 @@ async function findPages(dir: string): Promise<string[]> {
         pages.push(fullPath);
       }
     }
-  } catch (error) {
+  } catch {
     // Directory doesn't exist or can't be read
   }
   
   return pages;
 }
 
-async function generateStaticHTML(route: string, config: any): Promise<string> {
+async function generateStaticHTML(_route: string, config: { name?: string }): Promise<string> {
   return `<!doctype html>
 <html lang="en">
   <head>
@@ -239,7 +239,7 @@ async function showBuildInfo(outDir: string): Promise<void> {
       }
     }
     
-  } catch (error) {
+  } catch {
     // Ignore errors in showing build info
   }
 }

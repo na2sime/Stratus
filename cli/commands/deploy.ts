@@ -24,7 +24,7 @@ export async function deployCommand(options: DeployOptions) {
   try {
     const fs = await import('fs-extra');
     config = await fs.readJSON(configPath);
-  } catch (error) {
+  } catch {
     logger.error('Failed to read stratus.config.json');
     process.exit(1);
   }
@@ -54,7 +54,7 @@ export async function deployCommand(options: DeployOptions) {
     const distPath = path.join(process.cwd(), config.build?.outDir || 'dist');
     if (options.build || !await FileUtils.fileExists(distPath)) {
       logger.info('Building project for deployment...');
-      await buildForDeployment(config, platform);
+      await buildForDeployment(config, platform!);
     }
 
     // Deploy based on platform
@@ -84,7 +84,7 @@ export async function deployCommand(options: DeployOptions) {
   }
 }
 
-async function buildForDeployment(config: any, platform: string): Promise<void> {
+async function buildForDeployment(config: { features?: { ssr?: boolean } }, platform: string): Promise<void> {
   const buildOptions = [];
   
   if (config.features?.ssr && platform !== 'netlify') {
@@ -162,7 +162,7 @@ async function deployToNetlify(): Promise<void> {
   logger.succeedSpinner('Deployed to Netlify successfully!');
 }
 
-async function deployWithDocker(config: any): Promise<void> {
+async function deployWithDocker(config: { name?: string }): Promise<void> {
   logger.startSpinner('Creating Docker deployment...');
   
   // Create Dockerfile if it doesn't exist
@@ -226,7 +226,7 @@ app.listen(PORT, () => {
   logger.info(`Run with: docker run -p 3000:3000 ${config.name || 'stratus-app'}`);
 }
 
-async function deployToNode(config: any): Promise<void> {
+async function deployToNode(_config: { name?: string }): Promise<void> {
   logger.startSpinner('Preparing Node.js deployment...');
   
   // Create production package.json
@@ -282,7 +282,7 @@ app.listen(PORT, () => {
 
 async function runCommand(command: string, args: string[]): Promise<void> {
   return new Promise((resolve, reject) => {
-    const process = spawn(command, args, {
+    const childProcess = spawn(command, args, {
       stdio: 'pipe',
       shell: true,
       cwd: process.cwd()
@@ -290,11 +290,11 @@ async function runCommand(command: string, args: string[]): Promise<void> {
 
     let stderr = '';
 
-    process.stderr?.on('data', (data) => {
+    childProcess.stderr?.on('data', (data) => {
       stderr += data.toString();
     });
 
-    process.on('exit', (code) => {
+    childProcess.on('exit', (code) => {
       if (code !== 0) {
         reject(new Error(`Command failed with code ${code}: ${stderr}`));
       } else {

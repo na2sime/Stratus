@@ -6,18 +6,64 @@ import reactRefresh from 'eslint-plugin-react-refresh';
 
 export default [
   js.configs.recommended,
+  // Configuration for CLI files (Node.js environment)
   {
-    files: ['**/*.{ts,tsx}'],
+    files: ['cli/**/*.{ts,js}', 'bin/**/*.{ts,js}'],
     languageOptions: {
       parser: tsparser,
       ecmaVersion: 2020,
       sourceType: 'module',
       globals: {
+        // Node.js globals
+        process: 'readonly',
+        Buffer: 'readonly',
+        console: 'readonly',
+        global: 'readonly',
+        __filename: 'readonly',
+        __dirname: 'readonly',
+        exports: 'writable',
+        module: 'writable',
+        require: 'readonly',
+        setTimeout: 'readonly',
+        clearTimeout: 'readonly',
+        setInterval: 'readonly',
+        clearInterval: 'readonly',
+      },
+    },
+    plugins: {
+      '@typescript-eslint': tseslint,
+    },
+    rules: {
+      ...tseslint.configs.recommended.rules,
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+      '@typescript-eslint/no-explicit-any': 'warn',
+      'no-console': 'off', // Allow console in CLI
+    },
+  },
+  // Configuration for React files (Browser environment)
+  {
+    files: ['src/**/*.{ts,tsx}'],
+    languageOptions: {
+      parser: tsparser,
+      ecmaVersion: 2020,
+      sourceType: 'module',
+      globals: {
+        // Browser globals
         window: 'readonly',
         document: 'readonly',
         console: 'readonly',
         localStorage: 'readonly',
-        ErrorEvent: 'readonly'
+        sessionStorage: 'readonly',
+        fetch: 'readonly',
+        ErrorEvent: 'readonly',
+        HTMLElement: 'readonly',
+        AbortController: 'readonly',
+        setTimeout: 'readonly',
+        clearTimeout: 'readonly',
+        setInterval: 'readonly',
+        clearInterval: 'readonly',
+        Response: 'readonly',
+        React: 'readonly',
       },
     },
     plugins: {
@@ -36,7 +82,27 @@ export default [
       '@typescript-eslint/no-explicit-any': 'warn',
     },
   },
+  // Configuration for other TypeScript files (lib files)
   {
-    ignores: ['dist/', 'node_modules/', '**/*.js'],
+    files: ['*.{ts,tsx}', 'types/**/*.{ts,tsx}'],
+    languageOptions: {
+      parser: tsparser,
+      ecmaVersion: 2020,
+      sourceType: 'module',
+      globals: {
+        console: 'readonly',
+      },
+    },
+    plugins: {
+      '@typescript-eslint': tseslint,
+    },
+    rules: {
+      ...tseslint.configs.recommended.rules,
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+      '@typescript-eslint/no-explicit-any': 'warn',
+    },
+  },
+  {
+    ignores: ['dist/', 'node_modules/', 'templates/'],
   },
 ];

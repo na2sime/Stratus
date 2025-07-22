@@ -55,7 +55,7 @@ export class FileUtils {
         }
         
         await fs.writeFile(file, content, 'utf8');
-      } catch (error) {
+      } catch {
         logger.warn(`Failed to process file: ${file}`);
       }
     }
