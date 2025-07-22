@@ -7,7 +7,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/na2sime/Stratus.git"
+    "url": "git+https://github.com/na2sime/Stratus.git"
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

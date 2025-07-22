@@ -7,13 +7,12 @@
     "outDir": "./cli-dist",
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
-    "rootDir": "./",
+    "rootDir": "./cli",
     "declaration": false,
     "declarationMap": false
   },
   "include": [
-    "cli/**/*",
-    "bin/**/*"
+    "cli/**/*"
   ],
   "exclude": [
     "node_modules",

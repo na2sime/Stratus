@@ -19,7 +19,6 @@ export class FileUtils {
                     return !src.includes('node_modules') && !src.includes('.git');
                 }
             });
-            
             // Replace placeholders in files
             if (Object.keys(replacements).length > 0) {
                 await this.replaceInFiles(targetPath, replacements);
