@@ -18,29 +18,14 @@ export class FileUtils {
     replacements: Record<string, string> = {}
   ): Promise<void> {
     try {
-      // Debug: Check if template path exists and log its contents
-      const templateExists = await fs.pathExists(templatePath);
-      console.log(`[DEBUG] Template path: ${templatePath}`);
-      console.log(`[DEBUG] Template exists: ${templateExists}`);
-      
-      if (!templateExists) {
-        throw new Error(`Template directory does not exist: ${templatePath}`);
-      }
-
-      // List template contents before copy
-      const templateContents = await fs.readdir(templatePath);
-      console.log(`[DEBUG] Template contents: ${templateContents.join(', ')}`);
-
       await fs.copy(templatePath, targetPath, {
+        overwrite: true,
+        errorOnExist: false,
         filter: (src) => {
           // Skip node_modules and other unwanted folders
           return !src.includes('node_modules') && !src.includes('.git');
         }
       });
-
-      // Check target contents after copy
-      const targetContents = await fs.readdir(targetPath);
-      console.log(`[DEBUG] Target contents after copy: ${targetContents.join(', ')}`);
 
       // Replace placeholders in files
       if (Object.keys(replacements).length > 0) {
@@ -48,7 +33,6 @@ export class FileUtils {
       }
     } catch (error) {
       logger.error(`Failed to copy template from ${templatePath} to ${targetPath}`);
-      console.error('[DEBUG] Copy error:', error);
       throw error;
     }
   }
