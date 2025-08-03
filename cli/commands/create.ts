@@ -2,8 +2,8 @@ import inquirer from 'inquirer';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
-import { logger } from '../utils/logger.js';
-import { FileUtils } from '../utils/fileUtils.js';
+import { logger } from '../utils/logger';
+import { FileUtils } from '../utils/fileUtils';
 
 interface CreateOptions {
   template: string;

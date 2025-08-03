@@ -1,8 +1,8 @@
 import inquirer from 'inquirer';
 import { spawn } from 'child_process';
 import path from 'path';
-import { logger } from '../utils/logger.js';
-import { FileUtils } from '../utils/fileUtils.js';
+import { logger } from '../utils/logger';
+import { FileUtils } from '../utils/fileUtils';
 
 interface DeployOptions {
   platform?: string;

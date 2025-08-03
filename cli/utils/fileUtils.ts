@@ -1,6 +1,6 @@
 import fs from 'fs-extra';
 import path from 'path';
-import { logger } from './logger.js';
+import { logger } from './logger';
 
 export class FileUtils {
   static async ensureDir(dirPath: string): Promise<void> {

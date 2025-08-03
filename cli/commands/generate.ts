@@ -1,6 +1,6 @@
 import path from 'path';
-import { logger } from '../utils/logger.js';
-import { FileUtils } from '../utils/fileUtils.js';
+import { logger } from '../utils/logger';
+import { FileUtils } from '../utils/fileUtils';
 
 interface GenerateOptions {
   dir?: string;
