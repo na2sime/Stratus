@@ -142,9 +142,9 @@ async function createProject(projectName: string, projectPath: string, options: 
     await convertToJavaScript(projectPath);
   }
 
-  // Create Stratus config
-  logger.updateSpinner('Creating configuration...');
-  await createStratusConfig(projectPath, options);
+  // Update Stratus config with project-specific values
+  logger.updateSpinner('Updating configuration...');
+  await updateStratusConfig(projectPath, projectName, options);
 
   logger.succeedSpinner('Project created successfully!');
 }
@@ -169,37 +169,51 @@ async function convertToJavaScript(projectPath: string): Promise<void> {
   }
 }
 
-async function createStratusConfig(projectPath: string, options: CreateOptions): Promise<void> {
-  const config = {
-    name: path.basename(projectPath),
-    version: '1.0.0',
-    template: options.template,
-    features: {
-      ssr: options.template === 'ssr' || options.template === 'hybrid',
-      hybrid: options.template === 'hybrid',
-      typescript: !options.js,
-      services: true,
-      middleware: true,
-      tailwindcss: true
-    },
-    routing: {
-      routesDir: 'src/app',
-      layoutsDir: 'src/layouts',
-      pageExtensions: ['tsx', 'ts', 'jsx', 'js']
-    },
-    build: {
-      outDir: 'dist',
-      assetsDir: 'assets',
-      ssr: options.template === 'ssr'
-    },
-    dev: {
-      port: 5173,
-      open: true,
-      host: 'localhost'
-    }
-  };
-
+async function updateStratusConfig(projectPath: string, projectName: string, options: CreateOptions): Promise<void> {
   const configPath = path.join(projectPath, 'stratus.config.json');
+  
+  // Read existing config from template
+  let config: any = {};
+  try {
+    const fs = await import('fs-extra');
+    const existingConfig = await fs.readFile(configPath, 'utf8');
+    config = JSON.parse(existingConfig);
+  } catch {
+    // If no config exists, create a new one
+    config = {
+      routing: {
+        routesDir: 'src/app',
+        layoutsDir: 'src/layouts',
+        pageExtensions: ['tsx', 'ts', 'jsx', 'js']
+      },
+      build: {
+        outDir: 'dist',
+        assetsDir: 'assets'
+      },
+      dev: {
+        port: 5173,
+        open: true,
+        host: 'localhost'
+      }
+    };
+  }
+
+  // Update with project-specific values
+  config.name = projectName;
+  config.version = '1.0.0';
+  config.template = options.template;
+  
+  if (!config.features) config.features = {};
+  config.features.ssr = options.template === 'ssr' || options.template === 'hybrid';
+  config.features.hybrid = options.template === 'hybrid';
+  config.features.typescript = !options.js;
+  config.features.services = true;
+  config.features.middleware = true;
+  config.features.tailwindcss = true;
+  
+  if (!config.build) config.build = {};
+  config.build.ssr = options.template === 'ssr';
+
   await FileUtils.createFile(configPath, JSON.stringify(config, null, 2));
 }
 
