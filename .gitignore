@@ -8,6 +8,7 @@ pnpm-debug.log*
 lerna-debug.log*
 
 cli-dist/*
+test-directory/*
 
 node_modules
 dist
