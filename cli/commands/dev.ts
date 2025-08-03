@@ -23,8 +23,8 @@ export async function devCommand(options: DevOptions) {
   try {
     const fs = await import('fs-extra');
     config = await fs.readJSON(configPath);
-  } catch {
-    logger.error('Failed to read stratus.config.json');
+  } catch (error) {
+    logger.error(`Failed to read stratus.config.json: ${error instanceof Error ? error.message : 'Unknown error'}`);
     process.exit(1);
   }
 
