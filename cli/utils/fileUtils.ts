@@ -18,14 +18,8 @@ export class FileUtils {
     replacements: Record<string, string> = {}
   ): Promise<void> {
     try {
-      await fs.copy(templatePath, targetPath, {
-        overwrite: true,
-        errorOnExist: false,
-        filter: (src) => {
-          // Skip node_modules and other unwanted folders
-          return !src.includes('node_modules') && !src.includes('.git');
-        }
-      });
+      // Manual recursive copy to avoid fs.copy issues
+      await this.copyDirectoryRecursive(templatePath, targetPath);
 
       // Replace placeholders in files
       if (Object.keys(replacements).length > 0) {
@@ -34,6 +28,32 @@ export class FileUtils {
     } catch (error) {
       logger.error(`Failed to copy template from ${templatePath} to ${targetPath}`);
       throw error;
+    }
+  }
+
+  static async copyDirectoryRecursive(source: string, target: string): Promise<void> {
+    // Ensure target directory exists
+    await fs.ensureDir(target);
+    
+    // Read source directory
+    const entries = await fs.readdir(source, { withFileTypes: true });
+    
+    for (const entry of entries) {
+      const sourcePath = path.join(source, entry.name);
+      const targetPath = path.join(target, entry.name);
+      
+      // Skip unwanted files/folders
+      if (entry.name.includes('node_modules') || entry.name.includes('.git')) {
+        continue;
+      }
+      
+      if (entry.isDirectory()) {
+        // Recursively copy directory
+        await this.copyDirectoryRecursive(sourcePath, targetPath);
+      } else {
+        // Copy file
+        await fs.copyFile(sourcePath, targetPath);
+      }
     }
   }
 
